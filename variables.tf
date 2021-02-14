@@ -24,3 +24,8 @@ variable "trusted_accounts" {
   type        = list(string)
 }
 
+variable "trust_lambda" {
+  description = "Whether to allow AWS Lambda to read from the repository and update the policy."
+  default     = false
+}
+

@@ -14,13 +14,10 @@ resource "aws_ecr_repository_policy" "ecr_policy" {
 data "aws_iam_policy_document" "ecr_policy_doc" {
   statement {
     effect = "Allow"
-
     principals {
-      type = "AWS"
-
+      type        = "AWS"
       identifiers = formatlist("arn:aws:iam::%s:root", var.trusted_accounts)
     }
-
     actions = [
       "ecr:GetDownloadUrlForLayer",
       "ecr:BatchGetImage",
@@ -30,6 +27,25 @@ data "aws_iam_policy_document" "ecr_policy_doc" {
       "ecr:UploadLayerPart",
       "ecr:CompleteLayerUpload",
     ]
+  }
+
+  dynamic "statement" {
+    for_each = var.trust_lambda ? ["allow_lambda"] : []
+    content {
+      sid    = "LambdaECRImageRetrievalPolicy"
+      effect = "Allow"
+      principals {
+        identifiers = ["lambda.amazonaws.com"]
+        type        = "Service"
+      }
+      actions = [
+        "ecr:BatchGetImage",
+        "ecr:DeleteRepositoryPolicy",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:GetRepositoryPolicy",
+        "ecr:SetRepositoryPolicy",
+      ]
+    }
   }
 }
 
